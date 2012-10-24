@@ -28,8 +28,11 @@ endif()
 if(NOT OpenCV_DIR)
   #if(NOT Slicer_SOURCE_DIR)
   include("${CMAKE_CURRENT_SOURCE_DIR}/OpenCV.cmake")
-  find_package(OpenCV REQUIRED)
+  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR}/OpenCV)
 endif()
+
+find_package(OpenCV REQUIRED)
+
 
 #-----------------------------------------------------------------------------
 add_subdirectory(Logic)
