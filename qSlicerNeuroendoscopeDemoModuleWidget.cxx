@@ -22,10 +22,6 @@
 #include <vtkCollection.h>
 #include <vtkMRMLScene.h>
 
-// OpenCV includes
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
-
 // SlicerQt includes
 #include "qSlicerNeuroendoscopeDemoModuleWidget.h"
 #include "ui_qSlicerNeuroendoscopeDemoModule.h"
@@ -128,6 +124,8 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
 //-----------------------------------------------------------------------------
 void qSlicerNeuroendoscopeDemoModuleWidget::onVideoONToggled(bool checked)
 {
+  Q_D(qSlicerNeuroendoscopeDemoModuleWidget);
+
   if(checked)
     {
       CvCapture* capture;
@@ -145,16 +143,18 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onVideoONToggled(bool checked)
       //		   );
       cvNamedWindow( "PENTAX Neuroendoscope", CV_WINDOW_AUTOSIZE);
 
-      while( (bgr_frame = cvQueryFrame( capture )) != NULL)
+      while( ((bgr_frame = cvQueryFrame( capture )) != NULL) && checked)
 	{
+	  // Display image on OpenCV window
 	  cvShowImage( "PENTAX Neuroendoscope", bgr_frame);
 	  char c = cvWaitKey(33);
 	  if( c == 27 ) break;
 	}
+
+      d->VideoON->setChecked(false);
+      d->VideoOFF->setChecked(true);
+
       cvReleaseCapture(&capture);
-    }
-  else
-    {
       cvDestroyWindow( "PENTAX Neuroendoscope" );
     }
 }

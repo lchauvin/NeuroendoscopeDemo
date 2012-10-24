@@ -15,8 +15,8 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="ctkCollapsibleButton" name="CTKCollapsibleButton" native="true">
-     <property name="text" stdset="0">
+    <widget class="ctkCollapsibleButton" name="CTKCollapsibleButton">
+     <property name="text">
       <string>Display</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -91,7 +91,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="videoOFF">
+            <widget class="QRadioButton" name="VideoOFF">
              <property name="text">
               <string>OFF</string>
              </property>

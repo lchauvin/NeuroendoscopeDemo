@@ -18,6 +18,10 @@
 #ifndef __qSlicerNeuroendoscopeDemoModuleWidget_h
 #define __qSlicerNeuroendoscopeDemoModuleWidget_h
 
+// OpenCV includes
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+
 // SlicerQt includes
 #include "qSlicerAbstractModuleWidget.h"
 
