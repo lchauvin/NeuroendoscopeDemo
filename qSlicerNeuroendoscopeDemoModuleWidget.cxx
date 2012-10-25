@@ -131,7 +131,9 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onVideoONToggled(bool checked)
       CvCapture* capture;
 
       // Open /dev/video0
-      capture = cvCreateCameraCapture(0);
+      capture = cvCaptureFromCAM(0);
+      std::cerr << "Capture: " << capture << std::endl;
+
       assert( capture != NULL);
 
       IplImage* bgr_frame = cvQueryFrame( capture );

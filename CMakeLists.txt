@@ -1,38 +1,35 @@
 cmake_minimum_required(VERSION 2.8.7)
 
 #-----------------------------------------------------------------------------
-if(NOT Slicer_SOURCE_DIR)
   set(EXTENSION_NAME NeuroendoscopeDemo)
   set(EXTENSION_HOMEPAGE "http://www.slicer.org/slicerWiki/index.php/Documentation/4.1/Extensions/NeuroendoscopeDemo")
   set(EXTENSION_CATEGORY "Examples")
-  set(EXTENSION_CONTRIBUTORS "Jean-Christophe Fillion-Robin (Kitware)")
+  set(EXTENSION_CONTRIBUTORS "Laurent Chauvin (SNR)")
   set(EXTENSION_DESCRIPTION "This is an example of extension bundling a loadable module")
   set(EXTENSION_ICONURL "http://viewvc.slicer.org/viewvc.cgi/Slicer4/trunk/Extensions/Testing/NeuroendoscopeDemo/Resources/Icons/NeuroendoscopeDemo.png?revision=19437&view=co")
   set(EXTENSION_SCREENSHOTURLS "http://wiki.slicer.org/slicerWiki/images/4/42/Slicer-r19441-NeuroendoscopeDemo-screenshot.png")
-endif()
 
 #-----------------------------------------------------------------------------
-set(MODULE_NAME NeuroendoscopeDemo)
-set(MODULE_TITLE ${MODULE_NAME})
+find_package(Slicer REQUIRED)
+include(${Slicer_USE_FILE})
 
-string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
-
-#-----------------------------------------------------------------------------
-if(NOT Slicer_SOURCE_DIR)
-  find_package(Slicer REQUIRED)
-  include(${Slicer_USE_FILE})
-endif()
+find_package(Git REQUIRED)
 
 #-----------------------------------------------------------------------------
-# Find and install OpenCV by ayamada based on Laurent's contribution 08092012
-if(NOT OpenCV_DIR)
-  #if(NOT Slicer_SOURCE_DIR)
-  include("${CMAKE_CURRENT_SOURCE_DIR}/OpenCV.cmake")
-  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR}/OpenCV)
+option(${EXTENSION_NAME}_SUPERBUILD "Build ${EXTENSION_NAME} and the projects it depends on via SuperBuild.cmake." ON)
+mark_as_advanced(${EXTENSION_NAME}_SUPERBUILD)
+if(${EXTENSION_NAME}_SUPERBUILD)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild.cmake")
+  #return()
 endif()
 
 find_package(OpenCV REQUIRED)
 
+#-----------------------------------------------------------------------------
+set(MODULE_NAME ${EXTENSION_NAME})
+set(MODULE_TITLE ${MODULE_NAME})
+
+string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
 
 #-----------------------------------------------------------------------------
 add_subdirectory(Logic)
@@ -47,7 +44,7 @@ set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_BINARY_DIR}/Logic
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
-  ${OpenCV_INCLUDE_DIR}	# by ayamada based on Laurent's contribution 08092012
+  ${OpenCV_INCLUDE_DIR}
   )
 
 set(MODULE_SRCS
@@ -69,7 +66,7 @@ set(MODULE_UI_SRCS
 set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
   qSlicer${MODULE_NAME}ModuleWidgets
-  ${OpenCV_LIBS} # by ayamada based on Laurent's contribution 08092012
+  ${OpenCV_LIBS}
   )
 
 set(MODULE_RESOURCES
@@ -95,6 +92,5 @@ if(BUILD_TESTING)
 endif()
 
 #-----------------------------------------------------------------------------
-if(NOT Slicer_SOURCE_DIR)
-  include(${Slicer_EXTENSION_CPACK})
-endif()
+set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
+include(${Slicer_EXTENSION_CPACK})
