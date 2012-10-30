@@ -28,7 +28,7 @@ endif()
 find_package(OpenCV REQUIRED)
 
 #-----------------------------------------------------------------------------
-set(MODULE_NAME NeuroendoscopeDemo)
+set(MODULE_NAME ${EXTENSION_NAME})
 set(MODULE_TITLE ${MODULE_NAME})
 
 string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
