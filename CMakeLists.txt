@@ -28,7 +28,7 @@ endif()
 find_package(OpenCV REQUIRED)
 
 #-----------------------------------------------------------------------------
-set(MODULE_NAME ${EXTENSION_NAME})
+set(MODULE_NAME NeuroendoscopeDemo)
 set(MODULE_TITLE ${MODULE_NAME})
 
 string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
@@ -65,7 +65,7 @@ set(MODULE_UI_SRCS
   Resources/UI/qSlicer${MODULE_NAME}Module.ui
   )
 
-link_directories(${CMAKE_CURRENT_BINARY_DIR}/OpenCV-install/lib)
+link_directories(${CMAKE_CURRENT_BINARY_DIR}/OpenCV-build/lib)
 
 set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic

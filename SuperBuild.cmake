@@ -35,19 +35,19 @@ endif()
 # Project dependencies
 #-----------------------------------------------------------------------------
 
-set(inner_DEPENDENCIES "OpenCV")
+set(proj NeuroendoscopeDemo)
+set(${proj}_DEPENDENCIES "OpenCV")
 
-SlicerMacroCheckExternalProjectDependency(inner)
+SlicerMacroCheckExternalProjectDependency(${proj})
 
 set(ep_cmake_args)
 foreach(dep ${EXTENSION_DEPENDS})
   list(APPEND ep_cmake_args -D${dep}_DIR:PATH=${${dep}_DIR})
 endforeach()
 
-set(proj inner)
 ExternalProject_Add(${proj}
   DOWNLOAD_COMMAND ""
-  INSTALL_COMMAND ""
+  #INSTALL_COMMAND ""
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
   BINARY_DIR ${EXTENSION_BUILD_SUBDIRECTORY}
   CMAKE_GENERATOR ${gen}
@@ -66,7 +66,7 @@ ExternalProject_Add(${proj}
     # Slicer
     -DSlicer_DIR:PATH=${Slicer_DIR}
     # OpenCV
-    -DOpenCV_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/OpenCV-install
+    -DOpenCV_DIR:PATH=${OpenCV_DIR}
     ${ep_cmake_args}
   DEPENDS
     ${${proj}_DEPENDENCIES}
