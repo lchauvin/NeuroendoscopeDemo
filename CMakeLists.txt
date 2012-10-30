@@ -19,8 +19,10 @@ find_package(Git REQUIRED)
 option(${EXTENSION_NAME}_SUPERBUILD "Build ${EXTENSION_NAME} and the projects it depends on via SuperBuild.cmake." ON)
 mark_as_advanced(${EXTENSION_NAME}_SUPERBUILD)
 if(${EXTENSION_NAME}_SUPERBUILD)
-  include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild.cmake")
-  #return()
+  if(NOT OpenCV_DIR)
+    include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild.cmake")
+    return()
+  endif()
 endif()
 
 find_package(OpenCV REQUIRED)
@@ -44,7 +46,7 @@ set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_BINARY_DIR}/Logic
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
-  ${OpenCV_INCLUDE_DIR}
+  ${OpenCV_INCLUDE_DIRS}
   )
 
 set(MODULE_SRCS
@@ -63,10 +65,12 @@ set(MODULE_UI_SRCS
   Resources/UI/qSlicer${MODULE_NAME}Module.ui
   )
 
+link_directories(${CMAKE_CURRENT_BINARY_DIR}/OpenCV-install/lib)
+
 set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
   qSlicer${MODULE_NAME}ModuleWidgets
-  ${OpenCV_LIBS}
+  ${OpenCV_LIBRARIES}
   )
 
 set(MODULE_RESOURCES

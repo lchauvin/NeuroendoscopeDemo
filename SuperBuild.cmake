@@ -1,4 +1,4 @@
-
+	
 #-----------------------------------------------------------------------------
 # Git protocole option
 #-----------------------------------------------------------------------------
@@ -13,8 +13,7 @@ endif()
 # Enable and setup External project global properties
 #-----------------------------------------------------------------------------
 include(ExternalProject)
-include(SlicerMacroCheckExternalProjectDependency)
-#set(ep_base        "${CMAKE_BINARY_DIR}")
+set(ep_base        "${CMAKE_BINARY_DIR}")
 
 # Compute -G arg for configuring external projects with the same CMake generator:
 if(CMAKE_EXTRA_GENERATOR)
@@ -23,26 +22,34 @@ else()
   set(gen "${CMAKE_GENERATOR}")
 endif()
 
+
+#-----------------------------------------------------------------------------
+# OpenCV
+#-----------------------------------------------------------------------------
+
+if(NOT OpenCV_DIR)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild/External_OpenCV.cmake")
+endif()
+
 #-----------------------------------------------------------------------------
 # Project dependencies
 #-----------------------------------------------------------------------------
 
-set(proj OpenCV)
-set(${proj}_DEPENDENCIES "")
+set(inner_DEPENDENCIES "OpenCV")
 
-SlicerMacroCheckExternalProjectDependency(${proj})
+SlicerMacroCheckExternalProjectDependency(inner)
 
 set(ep_cmake_args)
 foreach(dep ${EXTENSION_DEPENDS})
   list(APPEND ep_cmake_args -D${dep}_DIR:PATH=${${dep}_DIR})
 endforeach()
 
+set(proj inner)
 ExternalProject_Add(${proj}
-  #DOWNLOAD_COMMAND ""
+  DOWNLOAD_COMMAND ""
   INSTALL_COMMAND ""
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${proj}
-  BINARY_DIR ${EXTENSION_BUILD_SUBDIRECTORY}/${proj}-build
-  GIT_REPOSITORY git://code.opencv.org/opencv.git
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+  BINARY_DIR ${EXTENSION_BUILD_SUBDIRECTORY}
   CMAKE_GENERATOR ${gen}
   CMAKE_ARGS
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
@@ -58,6 +65,8 @@ ExternalProject_Add(${proj}
     -DEXTENSION_SUPERBUILD_BINARY_DIR:PATH=${${EXTENSION_NAME}_BINARY_DIR}
     # Slicer
     -DSlicer_DIR:PATH=${Slicer_DIR}
+    # OpenCV
+    -DOpenCV_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/OpenCV-install
     ${ep_cmake_args}
   DEPENDS
     ${${proj}_DEPENDENCIES}
