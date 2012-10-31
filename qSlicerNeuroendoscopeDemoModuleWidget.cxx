@@ -56,6 +56,7 @@ qSlicerNeuroendoscopeDemoModuleWidget::qSlicerNeuroendoscopeDemoModuleWidget(QWi
   this->CameraNode = NULL;
   this->FilteredTransform = vtkMRMLLinearTransformNode::New();
   this->RawTransform = NULL;
+  this->w_cutoff = 7.5;
 }
 
 //-----------------------------------------------------------------------------
@@ -113,7 +114,14 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
       if(!this->CameraNode)
         return;
       }
-
+ 
+    if(this->FilteredTransform->GetScene() == NULL)
+	{
+	  std::cerr << "Adding FilteredTransform to the scene" << std::endl;
+	  this->FilteredTransform->SetName("Filtered_Neuroendoscope");	    
+	  this->mrmlScene()->AddNode(this->FilteredTransform);
+	}
+ 
     this->CameraNode->SetAndObserveTransformNodeID(this->FilteredTransform->GetID());
     }
   else
@@ -168,8 +176,7 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onVideoONToggled(bool checked)
 void qSlicerNeuroendoscopeDemoModuleWidget::SmoothingFilter(vtkMRMLLinearTransformNode* input, vtkMRMLLinearTransformNode* output)
 {
   double UnfiltPosOr[6], FiltPosOr[6];
-  double dt = 0.015;
-  double w_cutoff = 20;
+  double dt = 0.015; // 15ms
 
   // Get Matrixes
   vtkSmartPointer<vtkMatrix4x4> inputMatrix =
@@ -216,7 +223,7 @@ void qSlicerNeuroendoscopeDemoModuleWidget::SmoothingFilter(vtkMRMLLinearTransfo
   for(int i = 0; i < 6; i++)
     {
     // Low pass filter with w_cutoff frequency
-    FiltPosOr[i]  = (FiltPosOr[i] + dt*w_cutoff*UnfiltPosOr[i])/(1 + w_cutoff*dt);
+    FiltPosOr[i]  = (FiltPosOr[i] + dt*this->w_cutoff*UnfiltPosOr[i])/(1 + this->w_cutoff*dt);
     }
 
   double a = FiltPosOr[3];
@@ -256,9 +263,6 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackerCoordinatesReceived()
 {
   if(this->RawTransform && this->FilteredTransform)
     {
-    for(int i = 0; i < 3; i++)
-      {
       this->SmoothingFilter(this->RawTransform, this->FilteredTransform);
-      }
     }
 }

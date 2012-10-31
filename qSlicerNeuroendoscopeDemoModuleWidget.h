@@ -61,6 +61,10 @@ protected:
   vtkMRMLLinearTransformNode* FilteredTransform;
   vtkMRMLLinearTransformNode* RawTransform;
 
+  // Higher value = less smoothing, less delay
+  // Lower value = more smoothing, more delay
+  double w_cutoff; 
+
 private:
   Q_DECLARE_PRIVATE(qSlicerNeuroendoscopeDemoModuleWidget);
   Q_DISABLE_COPY(qSlicerNeuroendoscopeDemoModuleWidget);
