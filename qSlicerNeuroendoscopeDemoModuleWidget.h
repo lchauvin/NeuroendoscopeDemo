@@ -50,6 +50,7 @@ public:
 public slots:
   void onTrackingONToggled(bool checked);
   void onVideoONToggled(bool checked);
+  void onTrackerCoordinatesReceived();
 
 protected:
   QScopedPointer<qSlicerNeuroendoscopeDemoModuleWidgetPrivate> d_ptr;
@@ -57,7 +58,8 @@ protected:
   virtual void setup();
 
   vtkMRMLCameraNode* CameraNode;
-  vtkMRMLLinearTransformNode* TransformNode;
+  vtkMRMLLinearTransformNode* FilteredTransform;
+  vtkMRMLLinearTransformNode* RawTransform;
 
 private:
   Q_DECLARE_PRIVATE(qSlicerNeuroendoscopeDemoModuleWidget);

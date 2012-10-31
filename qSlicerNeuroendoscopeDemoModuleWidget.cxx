@@ -23,6 +23,7 @@
 #include <vtkMRMLScene.h>
 #include <vtkSmartPointer.h>
 #include <vtkMatrix4x4.h>
+#include <vtkEventQtSlotConnect.h>
 
 // SlicerQt includes
 #include "qSlicerNeuroendoscopeDemoModuleWidget.h"
@@ -53,7 +54,8 @@ qSlicerNeuroendoscopeDemoModuleWidget::qSlicerNeuroendoscopeDemoModuleWidget(QWi
     , d_ptr( new qSlicerNeuroendoscopeDemoModuleWidgetPrivate )
 {
   this->CameraNode = NULL;
-  this->TransformNode = vtkMRMLLinearTransformNode::New();
+  this->FilteredTransform = vtkMRMLLinearTransformNode::New();
+  this->RawTransform = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -79,7 +81,7 @@ void qSlicerNeuroendoscopeDemoModuleWidget::setup()
 //-----------------------------------------------------------------------------
 void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
 {
-  if(checked && this->TransformNode)
+  if(checked)
     {
     // Try to get transform
     vtkCollection* neuroendoscopeTransforms = NULL;
@@ -89,15 +91,14 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
 
     if(neuroendoscopeTransforms->GetNumberOfItems() > 0)
       {
-      vtkMRMLLinearTransformNode* RawTransform = dynamic_cast<vtkMRMLLinearTransformNode*>(neuroendoscopeTransforms->GetItemAsObject(neuroendoscopeTransforms->GetNumberOfItems()-1));
-      if(!RawTransform)
+      this->RawTransform = dynamic_cast<vtkMRMLLinearTransformNode*>(neuroendoscopeTransforms->GetItemAsObject(neuroendoscopeTransforms->GetNumberOfItems()-1));
+      if(!this->RawTransform)
         return;
 
-      // Apply smoothing filter
-      for(int i = 0; i < 3; i++)
-        {
-        this->SmoothingFilter(RawTransform, this->TransformNode);
-        }
+      // TODO: Observe RawTransform modified event then apply smoothing filter
+      vtkEventQtSlotConnect* eventToSlot = vtkEventQtSlotConnect::New();
+      eventToSlot->Connect(this->RawTransform, vtkMRMLLinearTransformNode::TransformModifiedEvent,
+                           this, SLOT(onTrackerCoordinatesReceived()));
       }
 
     // Try to get camera node
@@ -113,11 +114,11 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
         return;
       }
 
-    this->CameraNode->SetAndObserveTransformNodeID(this->TransformNode->GetID());
+    this->CameraNode->SetAndObserveTransformNodeID(this->FilteredTransform->GetID());
     }
   else
     {
-    if(this->CameraNode && this->TransformNode)
+    if(this->CameraNode)
       {
       this->CameraNode->SetAndObserveTransformNodeID("");
       }
@@ -248,4 +249,16 @@ void qSlicerNeuroendoscopeDemoModuleWidget::SmoothingFilter(vtkMRMLLinearTransfo
 
   // Setting the TransformNode
   output->SetAndObserveMatrixTransformToParent(TransformationMatrix);
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerNeuroendoscopeDemoModuleWidget::onTrackerCoordinatesReceived()
+{
+  if(this->RawTransform && this->FilteredTransform)
+    {
+    for(int i = 0; i < 3; i++)
+      {
+      this->SmoothingFilter(this->RawTransform, this->FilteredTransform);
+      }
+    }
 }
