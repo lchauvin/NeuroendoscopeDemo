@@ -79,8 +79,6 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
 {
   if(checked)
     {
-      std::cerr << "Tracking ON" << std::endl;
-  
      // Try to get transform
       vtkCollection* neuroendoscopeTransforms = NULL;
       neuroendoscopeTransforms = this->mrmlScene()->GetNodesByName("Neuroendoscope");
@@ -107,7 +105,6 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
 	    return;
 	}
       
-      std::cerr << "SetAndObserve" << std::endl;
       this->CameraNode->SetAndObserveTransformNodeID(this->TransformNode->GetID());
     }
   else
@@ -132,17 +129,14 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onVideoONToggled(bool checked)
 
       // Open /dev/video0
       capture = cvCaptureFromCAM(0);
-      std::cerr << "Capture: " << capture << std::endl;
 
       assert( capture != NULL);
 
       IplImage* bgr_frame = cvQueryFrame( capture );
-      //Size size = cvSize(
-      //		   (int)cvGetCaptureProperty( capture,
-      //					      CV_CAP_PROP_FRAME_WIDTH),
-      //		   (int)cvGetCaptureProperty( capture,
-      //					      CV_CAP_PROP_FRAME_HEIGHT)
-      //		   );
+      cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, 240);
+      cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, 320);
+      cvSetCaptureProperty(capture, CV_CAP_PROP_FPS,30);
+
       cvNamedWindow( "PENTAX Neuroendoscope", CV_WINDOW_AUTOSIZE);
 
       while( ((bgr_frame = cvQueryFrame( capture )) != NULL) && checked)
