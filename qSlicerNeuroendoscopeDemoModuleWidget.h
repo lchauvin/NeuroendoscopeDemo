@@ -45,6 +45,8 @@ public:
   qSlicerNeuroendoscopeDemoModuleWidget(QWidget *parent=0);
   virtual ~qSlicerNeuroendoscopeDemoModuleWidget();
 
+  void SmoothingFilter(vtkMRMLLinearTransformNode* input, vtkMRMLLinearTransformNode* output);
+
 public slots:
   void onTrackingONToggled(bool checked);
   void onVideoONToggled(bool checked);
