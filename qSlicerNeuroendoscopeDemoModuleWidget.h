@@ -51,6 +51,7 @@ public slots:
   void onTrackingONToggled(bool checked);
   void onVideoONToggled(bool checked);
   void onTrackerCoordinatesReceived();
+  void onFrequencyChanged(double val);
 
 protected:
   QScopedPointer<qSlicerNeuroendoscopeDemoModuleWidgetPrivate> d_ptr;

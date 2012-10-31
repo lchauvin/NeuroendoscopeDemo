@@ -77,6 +77,9 @@ void qSlicerNeuroendoscopeDemoModuleWidget::setup()
   connect(d->VideoON, SIGNAL(toggled(bool)),
           this, SLOT(onVideoONToggled(bool)));
 
+  connect(d->FrequencySlider, SIGNAL(valueChanged(double)),
+	  this, SLOT(onFrequencyChanged(double)));
+
 }
 
 //-----------------------------------------------------------------------------
@@ -264,5 +267,14 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackerCoordinatesReceived()
   if(this->RawTransform && this->FilteredTransform)
     {
       this->SmoothingFilter(this->RawTransform, this->FilteredTransform);
+    }
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerNeuroendoscopeDemoModuleWidget::onFrequencyChanged(double val)
+{
+  if(val > 0)
+    {
+      this->w_cutoff = val;
     }
 }
