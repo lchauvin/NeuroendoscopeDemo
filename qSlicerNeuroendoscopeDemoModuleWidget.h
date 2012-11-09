@@ -51,6 +51,7 @@ public slots:
   void onTrackingONToggled(bool checked);
   void onVideoONToggled(bool checked);
   void onTrackerCoordinatesReceived();
+  void onFilteredTransformModified();
   void onFrequencyChanged(double val);
 
 protected:
@@ -61,6 +62,8 @@ protected:
   vtkMRMLCameraNode* CameraNode;
   vtkMRMLLinearTransformNode* FilteredTransform;
   vtkMRMLLinearTransformNode* RawTransform;
+
+  vtkMatrix4x4* WorldMatrix; 
 
   // Higher value = less smoothing, less delay
   // Lower value = more smoothing, more delay

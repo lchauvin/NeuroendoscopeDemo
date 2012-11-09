@@ -16,7 +16,7 @@
   ==============================================================================*/
 
 // Qt includes
-#include <QDebug>
+//#include <QDebug>
 
 // VTK includes
 #include <vtkCollection.h>
@@ -24,6 +24,9 @@
 #include <vtkSmartPointer.h>
 #include <vtkMatrix4x4.h>
 #include <vtkEventQtSlotConnect.h>
+#include <vtkCamera.h>
+
+//#include <qSlicerPointBasedPatientRegistrationModule.h>
 
 // SlicerQt includes
 #include "qSlicerNeuroendoscopeDemoModuleWidget.h"
@@ -57,6 +60,9 @@ qSlicerNeuroendoscopeDemoModuleWidget::qSlicerNeuroendoscopeDemoModuleWidget(QWi
   this->FilteredTransform = vtkMRMLLinearTransformNode::New();
   this->RawTransform = NULL;
   this->w_cutoff = 7.5;
+  
+  this->WorldMatrix = vtkMatrix4x4::New();
+  this->WorldMatrix->Identity();
 }
 
 //-----------------------------------------------------------------------------
@@ -87,6 +93,8 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
 {
   if(checked)
     {
+    vtkEventQtSlotConnect* eventToSlot = vtkEventQtSlotConnect::New();
+
     // Try to get transform
     vtkCollection* neuroendoscopeTransforms = NULL;
     neuroendoscopeTransforms = this->mrmlScene()->GetNodesByName("Neuroendoscope");
@@ -100,7 +108,6 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
         return;
 
       // TODO: Observe RawTransform modified event then apply smoothing filter
-      vtkEventQtSlotConnect* eventToSlot = vtkEventQtSlotConnect::New();
       eventToSlot->Connect(this->RawTransform, vtkMRMLLinearTransformNode::TransformModifiedEvent,
                            this, SLOT(onTrackerCoordinatesReceived()));
       }
@@ -113,18 +120,18 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
 
     if(slicerCameras->GetNumberOfItems() > 0)
       {
-      this->CameraNode = dynamic_cast<vtkMRMLCameraNode*>(slicerCameras->GetItemAsObject(slicerCameras->GetNumberOfItems()-1));
-      if(!this->CameraNode)
-        return;
+	this->CameraNode = dynamic_cast<vtkMRMLCameraNode*>(slicerCameras->GetItemAsObject(0));
+	if(!this->CameraNode)
+	  return;
       }
  
     if(this->FilteredTransform->GetScene() == NULL)
 	{
-	  std::cerr << "Adding FilteredTransform to the scene" << std::endl;
 	  this->FilteredTransform->SetName("Filtered_Neuroendoscope");	    
 	  this->mrmlScene()->AddNode(this->FilteredTransform);
 	}
- 
+    
+    this->CameraNode->SetPosition(0,0,0);
     this->CameraNode->SetAndObserveTransformNodeID(this->FilteredTransform->GetID());
     }
   else
@@ -152,12 +159,13 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onVideoONToggled(bool checked)
 
     assert( capture != NULL);
 
-    IplImage* bgr_frame = cvQueryFrame( capture );
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, 240);
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, 320);
     cvSetCaptureProperty(capture, CV_CAP_PROP_FPS,30);
+  
+    IplImage* bgr_frame = cvQueryFrame( capture );
 
-    cvNamedWindow( "PENTAX Neuroendoscope", CV_WINDOW_AUTOSIZE);
+    cvNamedWindow( "PENTAX Neuroendoscope", CV_WINDOW_NORMAL);
 
     while( ((bgr_frame = cvQueryFrame( capture )) != NULL) && checked)
       {
@@ -265,8 +273,50 @@ void qSlicerNeuroendoscopeDemoModuleWidget::SmoothingFilter(vtkMRMLLinearTransfo
 void qSlicerNeuroendoscopeDemoModuleWidget::onTrackerCoordinatesReceived()
 {
   if(this->RawTransform && this->FilteredTransform)
-    {
+    {/*
+      vtkMatrix4x4::Multiply4x4(this->RawTransform->GetMatrixTransformToParent(),
+				this->ConversionTransform->GetMatrixTransformToParent(),
+				this->ConvertedTransform->GetMatrixTransformToParent());
+     */
+      //this->ConvertedTransform->Copy(this->RawTransform);
+      //this->ConvertedTransform->ApplyTransformMatrix(this->ConversionMatrix);
       this->SmoothingFilter(this->RawTransform, this->FilteredTransform);
+    }
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerNeuroendoscopeDemoModuleWidget::onFilteredTransformModified()
+{
+  if(this->FilteredTransform && this->CameraNode)
+    {
+      double trackerPosition[3];
+      this->FilteredTransform->GetMatrixTransformToWorld(this->WorldMatrix);
+
+      /*
+      trackerPosition[0] = (filteredMatrix->GetElement(0,0)*filteredMatrix->GetElement(0,3))+
+	(filteredMatrix->GetElement(0,1)*filteredMatrix->GetElement(1,3))+
+	(filteredMatrix->GetElement(0,2)*filteredMatrix->GetElement(2,3));
+      trackerPosition[1] = (filteredMatrix->GetElement(1,0)*filteredMatrix->GetElement(0,3))+
+	(filteredMatrix->GetElement(1,1)*filteredMatrix->GetElement(1,3))+
+	(filteredMatrix->GetElement(1,2)*filteredMatrix->GetElement(2,3));
+      trackerPosition[2] = (filteredMatrix->GetElement(2,0)*filteredMatrix->GetElement(0,3))+
+	(filteredMatrix->GetElement(2,1)*filteredMatrix->GetElement(1,3))+
+	(filteredMatrix->GetElement(2,2)*filteredMatrix->GetElement(2,3));
+      */
+      
+      trackerPosition[0] = this->WorldMatrix->GetElement(0,3);//filteredMatrix->GetElement(0,3);
+      trackerPosition[1] = this->WorldMatrix->GetElement(1,3);//filteredMatrix->GetElement(1,3);
+      trackerPosition[2] = this->WorldMatrix->GetElement(2,3);//filteredMatrix->GetElement(2,3);
+      
+      this->CameraNode->GetCamera()->SetPosition(trackerPosition[0], trackerPosition[1], trackerPosition[2]);
+
+      //double CameraOrientation[3] = {filteredMatrix->GetElement(0,2),
+      //				     filteredMatrix->GetElement(1,2),
+      //			     filteredMatrix->GetElement(2,2)};
+      double CameraOrientation[3] = { this->WorldMatrix->GetElement(1,0),
+				      this->WorldMatrix->GetElement(1,1),
+				      this->WorldMatrix->GetElement(1,2) };
+      this->CameraNode->SetViewUp(CameraOrientation);
     }
 }
 

@@ -47,6 +47,12 @@ set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
   ${OpenCV_INCLUDE_DIRS}
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/Widgets
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/Logic
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration-build/
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration-build/Widgets
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration-build/Logic
   )
 
 set(MODULE_SRCS
@@ -54,15 +60,23 @@ set(MODULE_SRCS
   qSlicer${MODULE_NAME}Module.h
   qSlicer${MODULE_NAME}ModuleWidget.cxx
   qSlicer${MODULE_NAME}ModuleWidget.h
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/qSlicerPointBasedPatientRegistrationModule.h
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/qSlicerPointBasedPatientRegistrationModule.cxx
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/qSlicerPointBasedPatientRegistrationModuleWidget.h
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/qSlicerPointBasedPatientRegistrationModuleWidget.cxx
   )
 
 set(MODULE_MOC_SRCS
   qSlicer${MODULE_NAME}Module.h
   qSlicer${MODULE_NAME}ModuleWidget.h
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/qSlicerPointBasedPatientRegistrationModule.h
+  #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/qSlicerPointBasedPatientRegistrationModuleWidget.h
   )
 
 set(MODULE_UI_SRCS
   Resources/UI/qSlicer${MODULE_NAME}Module.ui
+   #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/Resources/UI/qSlicerPointBasedPatientRegistrationModule.ui  
+   #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/Resources/UI/qSlicerRegistrationFiducialsPanelWidget.ui  
   )
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/OpenCV-build/lib)
@@ -71,10 +85,13 @@ set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
   qSlicer${MODULE_NAME}ModuleWidgets
   ${OpenCV_LIBRARIES}
+  #vtkSlicerPointBasedPatientRegistrationModuleLogic
+  #qSlicerPointBasedPatientRegistrationModuleWidgets
   )
 
 set(MODULE_RESOURCES
   Resources/qSlicer${MODULE_NAME}Module.qrc
+   #${CMAKE_CURRENT_BINARY_DIR}/PointBasedPatientRegistration/Resources/qSlicerPointBasedPatientRegistrationModule.qrc
   )
 
 #-----------------------------------------------------------------------------

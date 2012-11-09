@@ -23,20 +23,31 @@ else()
 endif()
 
 
+
+#-----------------------------------------------------------------------------
+# PointBasedPatientRegistration
+#-----------------------------------------------------------------------------
+
+#if(NOT PointBasedPatientRegistration_DIR)
+#  include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild/External_PointBasedPatientRegistration.cmake")
+#endif()
+
 #-----------------------------------------------------------------------------
 # OpenCV
 #-----------------------------------------------------------------------------
 
-if(NOT OpenCV_DIR)
-  include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild/External_OpenCV.cmake")
-endif()
+#if(NOT OpenCV_DIR)
+#  include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild/External_OpenCV.cmake")
+#endif()
 
 #-----------------------------------------------------------------------------
 # Project dependencies
 #-----------------------------------------------------------------------------
 
 set(proj NeuroendoscopeDemo)
-set(${proj}_DEPENDENCIES "OpenCV")
+set(${proj}_DEPENDENCIES 
+  #PointBasedPatientRegistration
+  OpenCV)
 
 SlicerMacroCheckExternalProjectDependency(${proj})
 
@@ -66,6 +77,8 @@ ExternalProject_Add(${proj}
     -DSlicer_DIR:PATH=${Slicer_DIR}
     # OpenCV
     -DOpenCV_DIR:PATH=${OpenCV_DIR}
+    # PointBasedPatientRegistration
+    #-DPointBasedPatientRegistration_DIR:PATH=${PBPR_DIR}
     ${ep_cmake_args}
   DEPENDS
     ${${proj}_DEPENDENCIES}
