@@ -319,14 +319,14 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onFilteredTransformModified()
       // Set ViewUp and FocalPoint 
       // Focal Point = direction along camera axis
       // View Up = Camera orientation ( up vector of camera )
-      trackerDirection[0] = trackerPosition[0] - this->WorldMatrix->GetElement(0,1)*10;
-      trackerDirection[1] = trackerPosition[1] - this->WorldMatrix->GetElement(1,1)*10;
-      trackerDirection[2] = trackerPosition[2] - this->WorldMatrix->GetElement(2,1)*10;
+      trackerDirection[0] = trackerPosition[0] + this->WorldMatrix->GetElement(0,2)*10;
+      trackerDirection[1] = trackerPosition[1] + this->WorldMatrix->GetElement(1,2)*10;
+      trackerDirection[2] = trackerPosition[2] + this->WorldMatrix->GetElement(2,2)*10;
       this->CameraNode->SetFocalPoint(trackerDirection);
 
-      trackerOrientation[0] = this->WorldMatrix->GetElement(0,2);
-      trackerOrientation[1] = this->WorldMatrix->GetElement(1,2);
-      trackerOrientation[2] = this->WorldMatrix->GetElement(2,2);
+      trackerOrientation[0] = this->WorldMatrix->GetElement(0,1);
+      trackerOrientation[1] = this->WorldMatrix->GetElement(1,1);
+      trackerOrientation[2] = this->WorldMatrix->GetElement(2,1);
       this->CameraNode->SetViewUp(trackerOrientation);
 
 
