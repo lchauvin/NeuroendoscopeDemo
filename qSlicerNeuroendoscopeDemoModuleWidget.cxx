@@ -61,8 +61,8 @@ qSlicerNeuroendoscopeDemoModuleWidget::qSlicerNeuroendoscopeDemoModuleWidget(QWi
   this->RawTransform = NULL;
   this->w_cutoff = 7.5;
   
-  this->WorldMatrix = vtkMatrix4x4::New();
-  this->WorldMatrix->Identity();
+  this->WorldMatrix = NULL;//vtkMatrix4x4::New();
+  //this->WorldMatrix->Identity();
 }
 
 //-----------------------------------------------------------------------------
@@ -129,10 +129,13 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onTrackingONToggled(bool checked)
 	{
 	  this->FilteredTransform->SetName("Filtered_Neuroendoscope");	    
 	  this->mrmlScene()->AddNode(this->FilteredTransform);
+
+	  eventToSlot->Connect(this->FilteredTransform, vtkMRMLLinearTransformNode::TransformModifiedEvent, 
+			       this, SLOT(onFilteredTransformModified()));
 	}
     
-    this->CameraNode->SetPosition(0,0,0);
-    this->CameraNode->SetAndObserveTransformNodeID(this->FilteredTransform->GetID());
+    //this->CameraNode->SetPosition(0,0,0);
+    //this->CameraNode->SetAndObserveTransformNodeID(this->FilteredTransform->GetID());
     }
   else
     {
@@ -290,8 +293,10 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onFilteredTransformModified()
   if(this->FilteredTransform && this->CameraNode)
     {
       double trackerPosition[3];
-      this->FilteredTransform->GetMatrixTransformToWorld(this->WorldMatrix);
-
+      double trackerDirection[3];
+      double trackerOrientation[3];
+      //this->RawTransform->GetMatrixTransformToWorld(this->WorldMatrix);
+      this->WorldMatrix = this->RawTransform->GetMatrixTransformToParent();
       /*
       trackerPosition[0] = (filteredMatrix->GetElement(0,0)*filteredMatrix->GetElement(0,3))+
 	(filteredMatrix->GetElement(0,1)*filteredMatrix->GetElement(1,3))+
@@ -303,20 +308,37 @@ void qSlicerNeuroendoscopeDemoModuleWidget::onFilteredTransformModified()
 	(filteredMatrix->GetElement(2,1)*filteredMatrix->GetElement(1,3))+
 	(filteredMatrix->GetElement(2,2)*filteredMatrix->GetElement(2,3));
       */
-      
+
+      // USE WORLD MATRIX ?
+      // Set Position
       trackerPosition[0] = this->WorldMatrix->GetElement(0,3);//filteredMatrix->GetElement(0,3);
       trackerPosition[1] = this->WorldMatrix->GetElement(1,3);//filteredMatrix->GetElement(1,3);
       trackerPosition[2] = this->WorldMatrix->GetElement(2,3);//filteredMatrix->GetElement(2,3);
-      
-      this->CameraNode->GetCamera()->SetPosition(trackerPosition[0], trackerPosition[1], trackerPosition[2]);
+      this->CameraNode->SetPosition(trackerPosition);
+
+      // Set ViewUp and FocalPoint 
+      // Focal Point = direction along camera axis
+      // View Up = Camera orientation ( up vector of camera )
+      trackerDirection[0] = trackerPosition[0] - this->WorldMatrix->GetElement(0,1)*10;
+      trackerDirection[1] = trackerPosition[1] - this->WorldMatrix->GetElement(1,1)*10;
+      trackerDirection[2] = trackerPosition[2] - this->WorldMatrix->GetElement(2,1)*10;
+      this->CameraNode->SetFocalPoint(trackerDirection);
+
+      trackerOrientation[0] = this->WorldMatrix->GetElement(0,2);
+      trackerOrientation[1] = this->WorldMatrix->GetElement(1,2);
+      trackerOrientation[2] = this->WorldMatrix->GetElement(2,2);
+      this->CameraNode->SetViewUp(trackerOrientation);
+
+
+      //this->CameraNode->GetCamera()->SetPosition(trackerPosition[0], trackerPosition[1], trackerPosition[2]);
 
       //double CameraOrientation[3] = {filteredMatrix->GetElement(0,2),
       //				     filteredMatrix->GetElement(1,2),
       //			     filteredMatrix->GetElement(2,2)};
-      double CameraOrientation[3] = { this->WorldMatrix->GetElement(1,0),
-				      this->WorldMatrix->GetElement(1,1),
-				      this->WorldMatrix->GetElement(1,2) };
-      this->CameraNode->SetViewUp(CameraOrientation);
+      //double CameraOrientation[3] = { this->WorldMatrix->GetElement(1,0),
+      //				      this->WorldMatrix->GetElement(1,1),
+      //				      this->WorldMatrix->GetElement(1,2) };
+      //this->CameraNode->SetViewUp(CameraOrientation);
     }
 }
 
